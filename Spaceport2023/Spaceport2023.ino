@@ -4,12 +4,27 @@
 
 const int chipSelect = BUILTIN_SDCARD;
 
+const int A1xInput = A2;
+const int A1yInput = A3;
+const int A1zInput = A4;
+
+int A1xRawMin = 381;
+int A1xRawMax = 410;
+
+int A1yRawMin = 382;
+int A1yRawMax = 412;
+
+int A1zRawMin = 385;
+int A1zRawMax = 414;
+
+const int sampleSize = 10;
+
 File logger;
 char filename[15];
 void setup()  {
   // set the Time library to use Teensy 3.0's RTC to keep time
   setSyncProvider(getTeensy3Time);
-
+  analogReadAveraging(sampleSize);
   Serial.begin(115200); 
   if (timeStatus()!= timeSet) {
     Serial.println("Unable to sync with the RTC");
@@ -39,7 +54,7 @@ void setup()  {
   }
   //Close the file after the test
   logger.close();
-  //Allows for LED light on feather to be turned on
+  //Allows for LED light on Teensy to be turned on
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
@@ -49,6 +64,23 @@ void loop() {
     Teensy3Clock.set(t); // set the RTC
     setTime(t);
   }
+  long A1xRaw = analogRead(A1xInput);
+  long A1yRaw = analogRead(A1yInput);
+  long A1zRaw = analogRead(A1zInput);
+
+  long A1xScaled = map(A1xRaw,A1xRawMin,A1xRawMax, -1000,1000);
+  long A1yScaled = map(A1yRaw,A1yRawMin,A1yRawMax, -1000,1000);
+  long A1zScaled = map(A1zRaw,A1zRawMin,A1zRawMax, -1000,1000);
+  float A1xAccel = A1xScaled / 1000.0;
+  float A1yAccel = A1yScaled / 1000.0;
+  float A1zAccel = A1zScaled / 1000.0;
+  Serial.print(" X1:");
+  Serial.print(A1xAccel);
+  Serial.print("G Y1:");
+  Serial.print(A1yAccel);
+  Serial.print("G Z1:");
+  Serial.print(A1zAccel);
+  Serial.print("G");
   digitalClockDisplay();
   logger = SD.open(filename, FILE_WRITE);  
   SDClockDisplay();
@@ -116,4 +148,15 @@ void printDigits(int digits){
   if(digits < 10)
     Serial.print('0');
   Serial.print(digits);
+}
+//This function will take in a given pin and return the raw reading of the axis given as an integer
+int getAxis(int pin) {
+  //Create a result to store each sample added up
+  long result = 0;
+  //Go through and read off the pin the set number of times (10) and add them up
+  for(int i = 0; i < sampleSize; i++) {
+    result += analogRead(pin);
+  }
+  //Finally return the average (divided by the sample size)
+  return result / sampleSize;
 }
