@@ -16,37 +16,38 @@ const int A3xInput = A12;
 const int A3yInput = A11;
 const int A3zInput = A10;
 
-int A1xRawMin = 380;
-int A1xRawMax = 410;
+const int A1xRawMin = 380;
+const int A1xRawMax = 410;
 
-int A1yRawMin = 382;
-int A1yRawMax = 412;
+const int A1yRawMin = 382;
+const int A1yRawMax = 412;
 
-int A1zRawMin = 385;
-int A1zRawMax = 414;
+const int A1zRawMin = 385;
+const int A1zRawMax = 414;
 
-int A2xRawMin = 380;
-int A2xRawMax = 410;
+const int A2xRawMin = 380;
+const int A2xRawMax = 410;
 
-int A2yRawMin = 381;
-int A2yRawMax = 411;
+const int A2yRawMin = 381;
+const int A2yRawMax = 411;
 
-int A2zRawMin = 382;
-int A2zRawMax = 412;
+const int A2zRawMin = 382;
+const int A2zRawMax = 412;
 
-int A3xRawMin = 381;
-int A3xRawMax = 410;
+const int A3xRawMin = 381;
+const int A3xRawMax = 410;
 
-int A3yRawMin = 586;
-int A3yRawMax = 616;
+const int A3yRawMin = 586;
+const int A3yRawMax = 616;
 
-int A3zRawMin = 589;
-int A3zRawMax = 620;
+const int A3zRawMin = 589;
+const int A3zRawMax = 620;
 
 const int sampleSize = 10;
 
 File logger;
 char filename[15];
+
 void setup()  {
   // set the Time library to use Teensy 3.0's RTC to keep time
   setSyncProvider(getTeensy3Time);
@@ -90,70 +91,18 @@ void setup()  {
 }
 
 void loop() {
-  /*long A1xRaw = analogRead(A1xInput);
-  long A1yRaw = analogRead(A1yInput);
-  long A1zRaw = analogRead(A1zInput);
-
-  long A1xScaled = map(A1xRaw,A1xRawMin,A1xRawMax, -1000,1000);
-  long A1yScaled = map(A1yRaw,A1yRawMin,A1yRawMax, -1000,1000);
-  long A1zScaled = map(A1zRaw,A1zRawMin,A1zRawMax, -1000,1000);
-  float A1xAccel = A1xScaled / 1000.0;
-  float A1yAccel = A1yScaled / 1000.0;
-  float A1zAccel = A1zScaled / 1000.0;
-  Serial.print(" X1:");
-  Serial.print(A1xAccel);
-  Serial.print("G Y1:");
-  Serial.print(A1yAccel);
-  Serial.print("G Z1:");
-  Serial.print(A1zAccel);
-  Serial.print("G ");
-  long A2xRaw = analogRead(A2xInput);
-  long A2yRaw = analogRead(A2yInput);
-  long A2zRaw = analogRead(A2zInput);
-
-  long A2xScaled = map(A2xRaw,A2xRawMin,A2xRawMax, -1000,1000);
-  long A2yScaled = map(A2yRaw,A2yRawMin,A2yRawMax, -1000,1000);
-  long A2zScaled = map(A2zRaw,A2zRawMin,A2zRawMax, -1000,1000);
-  float A2xAccel = A2xScaled / 1000.0;
-  float A2yAccel = A2yScaled / 1000.0;
-  float A2zAccel = A2zScaled / 1000.0;
-  Serial.print(" X2:");
-  Serial.print(A2xAccel);
-  Serial.print("G Y2:");
-  Serial.print(A2yAccel);
-  Serial.print("G Z2:");
-  Serial.print(A2zAccel);
-  Serial.print("G ");
-
-  long A3xRaw = analogRead(A3xInput);
-  long A3yRaw = analogRead(A3yInput);
-  long A3zRaw = analogRead(A3zInput);
-
-  long A3xScaled = map(A3xRaw,A3xRawMin,A3xRawMax, -1000,1000);
-  long A3yScaled = map(A3yRaw,A3yRawMin,A3yRawMax, -1000,1000);
-  long A3zScaled = map(A3zRaw,A3zRawMin,A3zRawMax, -1000,1000);
-  float A3xAccel = A3xScaled / 1000.0;
-  float A3yAccel = A3yScaled / 1000.0;
-  float A3zAccel = A3zScaled / 1000.0;
-  Serial.print(" X3:");
-  Serial.print(A3xAccel);
-  Serial.print("G Y3:");
-  Serial.print(A3yAccel);
-  Serial.print("G Z3:");
-  Serial.print(A3zAccel);
-  Serial.print("G ");
-  */
-  //printAccOutput(A1xInput,A1yInput,A1zInput, A1xRawMin,A1xRawMax, A1yRawMin, A1yRawMax, A1zRawMin, A1zRawMax);
-  //printAccOutput(A2xInput,A2yInput,A2zInput, A2xRawMin,A2xRawMax, A2yRawMin, A2yRawMax, A2zRawMin, A2zRawMax);
-  //printAccOutput(A3xInput,A3yInput,A3zInput, A3xRawMin,A3xRawMax, A3yRawMin, A3yRawMax, A3zRawMin, A3zRawMax);
-  //digitalClockDisplay();
+  //open the SD card for writing
   logger = SD.open(filename, FILE_WRITE);  
+  //print the output of the 3 accelerometer
   printSDAccOutput(logger,A1xInput,A1yInput,A1zInput, A1xRawMin,A1xRawMax, A1yRawMin, A1yRawMax, A1zRawMin, A1zRawMax);
   printSDAccOutput(logger,A2xInput,A2yInput,A2zInput, A2xRawMin,A2xRawMax, A2yRawMin, A2yRawMax, A2zRawMin, A2zRawMax);
   printSDAccOutput(logger,A3xInput,A3yInput,A3zInput, A3xRawMin,A3xRawMax, A3yRawMin, A3yRawMax, A3zRawMin, A3zRawMax);
+  //print the time to the sdcard
   SDClockDisplay();
   logger.close();
+  //turn on the led to indicate success 
   digitalWrite(LED_BUILTIN,HIGH);
+
 }
 void SDClockDisplay() {
   // digital clock display of the time
