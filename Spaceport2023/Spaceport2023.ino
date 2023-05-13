@@ -45,6 +45,8 @@ const int A3zRawMax = 620;
 
 const int sampleSize = 10;
 
+bool liftoffDetected = false;
+
 File logger;
 char filename[15];
 
@@ -91,6 +93,8 @@ void setup()  {
 }
 
 void loop() {
+  //check to see if we have some type of liftoff detected, if so start outputting to sd card
+  if(liftoffDetected == true) {
   //open the SD card for writing
   logger = SD.open(filename, FILE_WRITE);  
   //print the output of the 3 accelerometer
@@ -100,8 +104,11 @@ void loop() {
   //print the time to the sdcard
   SDClockDisplay();
   logger.close();
-  //turn on the led to indicate success 
-  digitalWrite(LED_BUILTIN,HIGH);
+  //turn on the led to indicate start of writing 
+  digitalWrite(LED_BUILTIN,HIGH);  }
+  else {
+    checkForLiftoff(A3xInput,A3yInput,A3zInput, A3xRawMin,A3xRawMax, A3yRawMin, A3yRawMax, A3zRawMin, A3zRawMax);
+  }
 
 }
 void SDClockDisplay() {
@@ -201,4 +208,22 @@ void printSDAccOutput(File logger, int xInput, int yInput, int zInput, int xRawM
   logger.print(",");
   logger.print(zAccel);
   logger.print(",");
+}
+void checkForLiftoff(int xInput, int yInput, int zInput, int xRawMin, int xRawMax, int yRawMin, int yRawMax, int zRawMin, int zRawMax) {
+  long xRaw = analogRead(xInput);
+  long yRaw = analogRead(yInput);
+  long zRaw = analogRead(zInput);
+
+  long xScaled = map(xRaw,xRawMin,xRawMax, -1000,1000);
+  long yScaled = map(yRaw,yRawMin,yRawMax, -1000,1000);
+  long zScaled = map(zRaw,zRawMin,zRawMax, -1000,1000);
+  float xAccel = xScaled / 1000.0;
+  float yAccel = yScaled / 1000.0;
+  float zAccel = zScaled / 1000.0;
+  float posX = abs(xAccel);
+  float posY = abs(yAccel);
+  float posZ = abs(zAccel);
+  if(posX + posY + posZ >= 3) {
+    liftoffDetected = true;
+  }
 }
