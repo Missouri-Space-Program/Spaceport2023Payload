@@ -1,6 +1,7 @@
 #include <TimeLib.h>
 #include <SD.h>
 #include <SPI.h>
+#include <InternalTemperature.h>
 
 const int chipSelect = BUILTIN_SDCARD;
 
@@ -12,9 +13,9 @@ const int A2xInput = A2;
 const int A2yInput = A3;
 const int A2zInput = A4;
 
-const int A3xInput = A12;
-const int A3yInput = A11;
-const int A3zInput = A10;
+const int A3xInput = A6;
+const int A3yInput = A7;
+const int A3zInput = A8;
 
 const int A1xRawMin = 380;
 const int A1xRawMax = 410;
@@ -34,14 +35,14 @@ const int A2yRawMax = 411;
 const int A2zRawMin = 382;
 const int A2zRawMax = 412;
 
-const int A3xRawMin = 381;
-const int A3xRawMax = 410;
+const int A3xRawMin = 382;
+const int A3xRawMax = 412;
 
-const int A3yRawMin = 586;
-const int A3yRawMax = 616;
+const int A3yRawMin = 382;
+const int A3yRawMax = 413;
 
-const int A3zRawMin = 589;
-const int A3zRawMax = 620;
+const int A3zRawMin = 385;
+const int A3zRawMax = 415;
 
 const int sampleSize = 10;
 
@@ -94,21 +95,29 @@ void setup()  {
 
 void loop() {
   //check to see if we have some type of liftoff detected, if so start outputting to sd card
-  if(liftoffDetected == true) {
+  //if(liftoffDetected == true) {
   //open the SD card for writing
   logger = SD.open(filename, FILE_WRITE);  
   //print the output of the 3 accelerometer
   printSDAccOutput(logger,A1xInput,A1yInput,A1zInput, A1xRawMin,A1xRawMax, A1yRawMin, A1yRawMax, A1zRawMin, A1zRawMax);
   printSDAccOutput(logger,A2xInput,A2yInput,A2zInput, A2xRawMin,A2xRawMax, A2yRawMin, A2yRawMax, A2zRawMin, A2zRawMax);
   printSDAccOutput(logger,A3xInput,A3yInput,A3zInput, A3xRawMin,A3xRawMax, A3yRawMin, A3yRawMax, A3zRawMin, A3zRawMax);
+  float temp = InternalTemperature.readTemperatureC();
+  logger.print(temp);
+  logger.print(",");
+  //printAccOutput(A1xInput,A1yInput,A1zInput, A1xRawMin,A1xRawMax, A1yRawMin, A1yRawMax, A1zRawMin, A1zRawMax);
+  //printAccOutput(A2xInput,A2yInput,A2zInput, A2xRawMin,A2xRawMax, A2yRawMin, A2yRawMax, A2zRawMin, A2zRawMax);
+  //printAccOutput(A3xInput,A3yInput,A3zInput, A3xRawMin,A3xRawMax, A3yRawMin, A3yRawMax, A3zRawMin, A3zRawMax);
+  //Serial.println();
   //print the time to the sdcard
   SDClockDisplay();
   logger.close();
   //turn on the led to indicate start of writing 
-  digitalWrite(LED_BUILTIN,HIGH);  }
-  else {
-    checkForLiftoff(A3xInput,A3yInput,A3zInput, A3xRawMin,A3xRawMax, A3yRawMin, A3yRawMax, A3zRawMin, A3zRawMax);
-  }
+  digitalWrite(LED_BUILTIN,HIGH);  
+  //}
+  //else {
+  //  checkForLiftoff(A3xInput,A3yInput,A3zInput, A3xRawMin,A3xRawMax, A3yRawMin, A3yRawMax, A3zRawMin, A3zRawMax);
+  //}
 
 }
 void SDClockDisplay() {
@@ -185,11 +194,11 @@ void printAccOutput(int xInput, int yInput, int zInput, int xRawMin, int xRawMax
   float yAccel = yScaled / 1000.0;
   float zAccel = zScaled / 1000.0;
   Serial.print(xAccel);
-  Serial.print("G ");
+  Serial.print(",");
   Serial.print(yAccel);
-  Serial.print("G ");
+  Serial.print(",");
   Serial.print(zAccel);
-  Serial.print("G ");
+  Serial.print(",");
 }
 void printSDAccOutput(File logger, int xInput, int yInput, int zInput, int xRawMin, int xRawMax, int yRawMin, int yRawMax, int zRawMin, int zRawMax) {
   long xRaw = analogRead(xInput);
@@ -220,10 +229,11 @@ void checkForLiftoff(int xInput, int yInput, int zInput, int xRawMin, int xRawMa
   float xAccel = xScaled / 1000.0;
   float yAccel = yScaled / 1000.0;
   float zAccel = zScaled / 1000.0;
-  float posX = abs(xAccel);
-  float posY = abs(yAccel);
-  float posZ = abs(zAccel);
-  if(posX + posY + posZ >= 3) {
+  float posX = xAccel * xAccel;
+  float posY = yAccel * yAccel;
+  float posZ = zAccel * zAccel;
+  float magAccel = sqrt(posX + posY + posZ);
+  if(magAccel >= 3) {
     liftoffDetected = true;
   }
 }
